@@ -42,6 +42,7 @@ next-env.d.ts
 stock_booking.db
 stock_booking.db-shm
 stock_booking.db-wal
+stock_booking_backup_auto_*.db
 
 # local scripts
 start.bat

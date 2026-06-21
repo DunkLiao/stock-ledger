@@ -47,6 +47,9 @@ export default function RootLayout({
               <Link href="/report" className="text-zinc-600 hover:text-zinc-900">
                 月報表
               </Link>
+              <Link href="/backup" className="text-zinc-600 hover:text-zinc-900">
+                備份管理
+              </Link>
             </div>
           </div>
         </nav>
