@@ -66,6 +66,9 @@ function initDb(db: Database.Database) {
 
 export function closeDb() {
   if (db) {
+    try {
+      db.pragma("wal_checkpoint(TRUNCATE)");
+    } catch {}
     db.close();
     db = null;
   }
