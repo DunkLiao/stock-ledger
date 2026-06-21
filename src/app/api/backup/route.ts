@@ -21,15 +21,12 @@ function ensureDir(filePath: string) {
 function removeWalShm() {
   for (const suffix of ["-wal", "-shm"]) {
     const p = DB_PATH + suffix;
-    for (let i = 0; i < 3; i++) {
-      try {
-        if (fs.existsSync(p)) {
-          fs.unlinkSync(p);
-        }
-        break;
-      } catch {
-        if (i === 2) throw new Error(`無法刪除殘留檔案: ${p}`);
+    try {
+      if (fs.existsSync(p)) {
+        fs.unlinkSync(p);
       }
+    } catch {
+      // Best-effort: skip if file is still locked
     }
   }
 }
@@ -38,6 +35,12 @@ export async function GET() {
   if (!fs.existsSync(DB_PATH)) {
     return NextResponse.json({ error: "Database file not found" }, { status: 404 });
   }
+
+  // Flush WAL to main database file before reading
+  const db = getDb();
+  try {
+    db.pragma("wal_checkpoint(TRUNCATE)");
+  } catch {}
 
   const stats = fs.statSync(DB_PATH);
   const fileBuffer = fs.readFileSync(DB_PATH);
@@ -104,5 +107,47 @@ export async function POST(request: NextRequest) {
 
     const message = e instanceof Error ? e.message : "未知錯誤";
     return NextResponse.json({ error: `還原失敗: ${message}` }, { status: 500 });
+  }
+}
+
+export async function DELETE() {
+  try {
+    const backupDir = path.dirname(DB_PATH);
+    const timestamp = getTimestamp();
+    const backupPath = path.join(backupDir, `stock_booking_backup_auto_${timestamp}.db`);
+
+    ensureDir(DB_PATH);
+
+    // Backup current database before clearing
+    const db = getDb();
+    try {
+      db.pragma("wal_checkpoint(TRUNCATE)");
+    } catch {}
+    closeDb();
+    removeWalShm();
+
+    if (fs.existsSync(DB_PATH)) {
+      fs.copyFileSync(DB_PATH, backupPath);
+    }
+
+    // Reopen and clear all data via SQL (avoids file lock issues on Windows)
+    const freshDb = getDb();
+    freshDb.exec(`
+      DELETE FROM transactions;
+      DELETE FROM price_cache;
+      DELETE FROM stock_dividends;
+      DELETE FROM config;
+      INSERT INTO config (key, value) VALUES ('settlement_balance', '0');
+      INSERT INTO config (key, value) VALUES ('fee_discount', '0.35');
+    `);
+
+    return NextResponse.json({
+      success: true,
+      backupPath: path.basename(backupPath),
+    });
+  } catch (e) {
+    try { getDb(); } catch {}
+    const message = e instanceof Error ? e.message : "未知錯誤";
+    return NextResponse.json({ error: `重置失敗: ${message}` }, { status: 500 });
   }
 }
