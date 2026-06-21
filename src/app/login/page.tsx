@@ -25,7 +25,6 @@ export default function LoginPage() {
       const data = await res.json();
       if (data.success) {
         router.push("/");
-        router.refresh();
       } else {
         setError(data.error || "登入失敗");
       }
