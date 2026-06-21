@@ -23,10 +23,11 @@ ENV DATABASE_PATH=/data/stock_booking.db
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
 
 RUN mkdir -p /data && chown -R node:node /data
 
 EXPOSE 3000
-ENTRYPOINT ["/docker-entrypoint.sh"]
+STOPSIGNAL SIGTERM
+ENTRYPOINT ["./docker-entrypoint.sh"]
