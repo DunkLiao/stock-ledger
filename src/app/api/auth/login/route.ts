@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const token = createToken(username);
+  const token = await createToken(username);
   const response = NextResponse.json({ success: true });
   response.cookies.set("auth_token", token, {
     httpOnly: true,

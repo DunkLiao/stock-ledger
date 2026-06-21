@@ -45,7 +45,7 @@ Zeabur 會自動偵測到根目錄的 `Dockerfile`，並開始建置。
 
 | 變數名稱 | 說明 | 範例值 |
 |---|---|---|
-| `DATABASE_PATH` | 資料庫檔案路徑 | `/data/stock_booking.db` |
+| `DATABASE_PATH` | 資料庫檔案路徑（Dockerfile 已預設，可依需要覆寫） | `/data/stock_booking.db` |
 | `AUTH_USERNAME` | 登入帳號 | `admin` |
 | `AUTH_PASSWORD` | 登入密碼 | 請自行設定 |
 | `AUTH_SECRET` | Token 簽署密鑰 | 隨機字串（建議 32 字元以上） |
@@ -72,7 +72,7 @@ Zeabur 會自動偵測到根目錄的 `Dockerfile`，並開始建置。
 
 | 項目 | 本機開發 | Zeabur 部署 |
 |---|---|---|
-| DB 路徑 | `./stock_booking.db`（自動 fallback） | `/data/stock_booking.db`（需設定 `DATABASE_PATH`） |
+| DB 路徑 | `./stock_booking.db`（自動 fallback） | `/data/stock_booking.db`（Docker 預設，可用 `DATABASE_PATH` 覆寫） |
 | 環境變數 | `.env.local` 檔案 | Zeabur Dashboard 設定 |
 | 啟動方式 | `npm run dev` | Docker 容器內 `node server.js` |
 | 持久化 | 本機檔案系統 | Zeabur Volume |
