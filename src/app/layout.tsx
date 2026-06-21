@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import LogoutButton from "@/components/LogoutButton";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,7 +35,7 @@ export default function RootLayout({
             <Link href="/" className="font-bold text-lg text-zinc-900">
               股票記帳
             </Link>
-            <div className="flex gap-4 text-sm">
+            <div className="flex gap-4 text-sm flex-1">
               <Link href="/" className="text-zinc-600 hover:text-zinc-900">
                 儀表板
               </Link>
@@ -51,6 +52,7 @@ export default function RootLayout({
                 備份管理
               </Link>
             </div>
+            <LogoutButton />
           </div>
         </nav>
         <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6">{children}</main>

@@ -1,7 +1,14 @@
 import Database from "better-sqlite3";
 import path from "path";
 
-const DB_PATH = path.join(process.cwd(), "stock_booking.db");
+export function getDbPath(): string {
+  if (process.env.DATABASE_PATH) {
+    return process.env.DATABASE_PATH;
+  }
+  return path.join(process.cwd(), "stock_booking.db");
+}
+
+const DB_PATH = getDbPath();
 
 let db: Database.Database | null = null;
 

@@ -1,0 +1,9 @@
+node_modules
+.next
+stock_booking.db
+stock_booking.db-*
+*.md
+.git
+.gitignore
+.env
+.env.local

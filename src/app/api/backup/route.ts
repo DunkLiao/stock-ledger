@@ -1,10 +1,9 @@
-import { getDb, closeDb } from "@/lib/db";
+import { getDb, closeDb, getDbPath } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-const DB_FILENAME = "stock_booking.db";
-const DB_PATH = path.join(process.cwd(), DB_FILENAME);
+const DB_PATH = getDbPath();
 
 function getTimestamp(): string {
   const now = new Date();
