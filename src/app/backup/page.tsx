@@ -113,7 +113,7 @@ export default function BackupPage() {
   const exportButtons = [
     { type: "transactions", label: "匯出交易記錄", desc: "下載所有買賣交易明細" },
     { type: "holdings", label: "匯出持倉明細", desc: "下載目前持倉、平均成本與股息" },
-    { type: "dividends", label: "匯出股息資料", desc: "下載各股票累計股息" },
+    { type: "dividends", label: "匯出股息資料", desc: "下載逐筆股利領息記錄" },
     { type: "config", label: "匯出系統設定", desc: "下載交割金與手續費折扣設定" },
   ];
 

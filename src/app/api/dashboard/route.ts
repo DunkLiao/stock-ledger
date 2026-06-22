@@ -53,7 +53,7 @@ export async function GET() {
   }[];
   const priceMap = new Map(prices.map((p) => [p.stock_code, p]));
 
-  const dividends = db.prepare("SELECT stock_code, total_dividend FROM stock_dividends").all() as {
+  const dividends = db.prepare("SELECT stock_code, COALESCE(SUM(amount), 0) AS total_dividend FROM dividend_records GROUP BY stock_code").all() as {
     stock_code: string;
     total_dividend: number;
   }[];

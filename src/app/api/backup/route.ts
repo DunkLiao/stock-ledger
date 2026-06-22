@@ -135,6 +135,7 @@ export async function DELETE() {
     freshDb.exec(`
       DELETE FROM transactions;
       DELETE FROM price_cache;
+      DELETE FROM dividend_records;
       DELETE FROM stock_dividends;
       DELETE FROM config;
       INSERT INTO config (key, value) VALUES ('settlement_balance', '0');

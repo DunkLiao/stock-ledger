@@ -43,6 +43,15 @@ export interface DashboardData {
   fee_discount: number;
 }
 
+export interface DividendRecord {
+  id: number;
+  date: string;
+  stock_code: string;
+  stock_name: string;
+  amount: number;
+  note: string;
+}
+
 export interface MonthlySummary {
   total_buy: number;
   total_sell: number;

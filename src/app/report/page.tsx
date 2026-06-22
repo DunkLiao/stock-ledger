@@ -138,7 +138,7 @@ function ReportContent({
                   <th className="py-2 pr-1 text-right tabular-nums">投入金額</th>
                   <th className="py-2 pr-1 text-right tabular-nums">現價</th>
                   <th className="py-2 pr-1 text-right tabular-nums">漲跌</th>
-                  <th className="py-2 pr-1 text-right tabular-nums">利息</th>
+                  <th className="py-2 pr-1 text-right tabular-nums">已領取股息</th>
                   <th className="py-2 pr-1 text-right tabular-nums">預估收入</th>
                   <th className="py-2 text-right tabular-nums">預估損益</th>
                 </tr>
@@ -234,7 +234,7 @@ function ReportContent({
               className={`text-xs ${isScreen ? "text-zinc-400 mt-3" : "text-zinc-400 print:text-black mt-4 mb-2"}`}
             >
               預估收入 = 市價 − 賣出手續費({(0.1425 * data.fee_discount).toFixed(4)}
-              %) − 證交稅(股票0.3% / ETF0.1%)　｜　預估損益 = 預估收入 + 利息 −
+              %) − 證交稅(股票0.3% / ETF0.1%)　｜　預估損益 = 預估收入 + 已領取股息 −
               投資成本
             </p>
           </div>

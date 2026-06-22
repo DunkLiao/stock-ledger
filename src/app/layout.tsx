@@ -42,6 +42,9 @@ export default function RootLayout({
               <Link href="/transactions" className="text-zinc-600 hover:text-zinc-900">
                 交易紀錄
               </Link>
+              <Link href="/dividends" className="text-zinc-600 hover:text-zinc-900">
+                股利領息
+              </Link>
               <Link href="/import" className="text-zinc-600 hover:text-zinc-900">
                 匯入CSV
               </Link>

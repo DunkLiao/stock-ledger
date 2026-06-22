@@ -61,6 +61,18 @@ function initDb(db: Database.Database) {
       stock_code TEXT PRIMARY KEY,
       total_dividend REAL NOT NULL DEFAULT 0
     );
+
+    CREATE TABLE IF NOT EXISTS dividend_records (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      stock_code TEXT NOT NULL,
+      stock_name TEXT NOT NULL,
+      amount REAL NOT NULL,
+      note TEXT DEFAULT ''
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_dividend_records_date ON dividend_records(date);
+    CREATE INDEX IF NOT EXISTS idx_dividend_records_stock_code ON dividend_records(stock_code);
   `);
 }
 

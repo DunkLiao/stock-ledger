@@ -26,7 +26,6 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [refreshedPrices, setRefreshedPrices] = useState<Record<string, number>>({});
   const [manualPrices, setManualPrices] = useState<Record<string, number>>({});
-  const [dividends, setDividends] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [editSettings, setEditSettings] = useState(false);
@@ -40,11 +39,6 @@ export default function DashboardPage() {
         setData(d);
         setBalanceInput(String(d.settlement_balance));
         setDiscountInput(String(d.fee_discount));
-        const divMap: Record<string, number> = {};
-        for (const h of d.holdings) {
-          divMap[h.stock_code] = h.total_dividend;
-        }
-        setDividends(divMap);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -92,15 +86,6 @@ export default function DashboardPage() {
     setManualPrices((prev) => ({ ...prev, [code]: price }));
   };
 
-  const saveDividend = async (code: string, amount: number) => {
-    setDividends((prev) => ({ ...prev, [code]: amount }));
-    await fetch("/api/dividends", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stock_code: code, total_dividend: amount }),
-    });
-  };
-
   if (loading) {
     return <div className="text-center py-12 text-zinc-500">載入中...</div>;
   }
@@ -120,7 +105,7 @@ export default function DashboardPage() {
     const sellTaxRate = h.is_etf ? 0.001 : 0.003;
     const sellTax = marketValue * sellTaxRate;
     const estimatedRevenue = marketValue - sellFee - sellTax;
-    const estimatedPL = estimatedRevenue + dividends[h.stock_code] - h.total_cost;
+    const estimatedPL = estimatedRevenue + h.total_dividend - h.total_cost;
     const isManual = manualPrice != null;
     const changePct = h.change_percent;
 
@@ -246,7 +231,7 @@ export default function DashboardPage() {
                   <th className="pb-2 pr-2 text-right">投入金額</th>
                   <th className="pb-2 pr-2 text-right">現價</th>
                   <th className="pb-2 pr-2 text-right">漲跌</th>
-                  <th className="pb-2 pr-2 text-right">利息</th>
+                  <th className="pb-2 pr-2 text-right">已領取股息</th>
                   <th className="pb-2 pr-2 text-right">預估收入</th>
                   <th className="pb-2 pr-2 text-right">預估損益</th>
                 </tr>
@@ -301,23 +286,8 @@ export default function DashboardPage() {
                           ? `${changePct > 0 ? "+" : ""}${changePct.toFixed(2)}%`
                           : "-"}
                       </td>
-                      <td className="py-2 pr-2 text-right">
-                        <input
-                          type="number"
-                          step="1"
-                          min="0"
-                          value={dividends[h.stock_code] ?? 0}
-                          placeholder="0"
-                          className="w-20 px-2 py-1 border border-zinc-300 rounded text-right text-sm"
-                          onChange={(e) => {
-                            const v = parseFloat(e.target.value) || 0;
-                            setDividends((prev) => ({ ...prev, [h.stock_code]: v }));
-                          }}
-                          onBlur={(e) => {
-                            const v = parseFloat(e.target.value) || 0;
-                            saveDividend(h.stock_code, v);
-                          }}
-                        />
+                      <td className="py-2 pr-2 text-right text-zinc-500">
+                        ${Math.round(h.total_dividend).toLocaleString()}
                       </td>
                       <td className="py-2 pr-2 text-right">
                         ${Math.round(estimatedRevenue).toLocaleString()}
@@ -353,7 +323,7 @@ export default function DashboardPage() {
               </tfoot>
             </table>
             <p className="text-xs text-zinc-400 mt-3">
-              預估收入 = 市價 − 賣出手續費({(0.1425 * data.fee_discount).toFixed(4)}%) − 證交稅({data.fee_discount === 0.35 ? "股票0.3% / ETF0.1%" : "股票0.3%"})　｜　預估損益 = 預估收入 + 利息 − 投資成本
+              預估收入 = 市價 − 賣出手續費({(0.1425 * data.fee_discount).toFixed(4)}%) − 證交稅({data.fee_discount === 0.35 ? "股票0.3% / ETF0.1%" : "股票0.3%"})　｜　預估損益 = 預估收入 + 已領取股息 − 投資成本
             </p>
           </div>
         )}

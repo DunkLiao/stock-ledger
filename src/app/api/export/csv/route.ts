@@ -18,7 +18,7 @@ function csvResponse(csv: string, filename: string) {
 
 const TX_FIELDS = ["id", "date", "stock_code", "stock_name", "type", "quantity", "price", "fee", "tax", "total_amount", "note"];
 const HOLDING_FIELDS = ["stock_code", "stock_name", "quantity", "avg_cost", "total_cost", "total_dividend"];
-const DIV_FIELDS = ["stock_code", "total_dividend"];
+const DIV_FIELDS = ["id", "date", "stock_code", "stock_name", "amount", "note"];
 const CONFIG_FIELDS = ["key", "value"];
 
 export async function GET(request: NextRequest) {
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         tradesByStock.set(t.stock_code, list);
       }
 
-      const dividends = db.prepare("SELECT stock_code, total_dividend FROM stock_dividends").all() as {
+      const dividends = db.prepare("SELECT stock_code, COALESCE(SUM(amount), 0) AS total_dividend FROM dividend_records GROUP BY stock_code").all() as {
         stock_code: string; total_dividend: number;
       }[];
       const dividendMap = new Map(dividends.map((d) => [d.stock_code, d.total_dividend]));
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
     }
 
     case "dividends": {
-      const rows = db.prepare("SELECT * FROM stock_dividends ORDER BY stock_code ASC").all();
+      const rows = db.prepare("SELECT * FROM dividend_records ORDER BY date ASC, id ASC").all();
       const csv = Papa.unparse({ fields: DIV_FIELDS, data: rows as Record<string, unknown>[] });
       return csvResponse(csv, "dividends.csv");
     }
