@@ -42,12 +42,14 @@ interface PrecomputedRow {
   sellTax: number;
   estimatedRevenue: number;
   estimatedPL: number;
+  estimatedPLNoDiv: number;
 }
 
 interface ReportTotals {
   totalMarketValue: number;
   totalEstRevenue: number;
   totalEstPL: number;
+  totalEstPLNoDiv: number;
   totalAssets: number;
 }
 
@@ -140,8 +142,9 @@ function ReportContent({
                   <th className="py-2 pr-1 text-right tabular-nums">漲跌</th>
                   <th className="py-2 pr-1 text-right tabular-nums">已領取股息</th>
                   <th className="py-2 pr-1 text-right tabular-nums">預估收入</th>
-                  <th className="py-2 text-right tabular-nums">預估損益</th>
-                </tr>
+                   <th className="py-2 text-right tabular-nums">預估損益(含息)</th>
+                   <th className="py-2 text-right tabular-nums">預估損益(不含息)</th>
+                 </tr>
               </thead>
               <tbody>
                 {data.holdings.map((h, i) => {
@@ -205,6 +208,16 @@ function ReportContent({
                         {p.estimatedPL >= 0 ? "+" : ""}
                         {fmt(Math.round(Math.abs(p.estimatedPL)))}
                       </td>
+                      <td
+                        className={`py-2 text-right tabular-nums font-medium ${
+                          p.estimatedPLNoDiv >= 0
+                            ? "text-red-600 print:text-red-800"
+                            : "text-green-600 print:text-green-800"
+                        }`}
+                      >
+                        {p.estimatedPLNoDiv >= 0 ? "+" : ""}
+                        {fmt(Math.round(Math.abs(p.estimatedPLNoDiv)))}
+                      </td>
                     </tr>
                   );
                 })}
@@ -227,6 +240,16 @@ function ReportContent({
                     {totals.totalEstPL >= 0 ? "+" : ""}
                     {fmt(Math.round(Math.abs(totals.totalEstPL)))}
                   </td>
+                  <td
+                    className={`pt-3 text-right tabular-nums ${
+                      totals.totalEstPLNoDiv >= 0
+                        ? "text-red-600 print:text-red-800"
+                        : "text-green-600 print:text-green-800"
+                    }`}
+                  >
+                    {totals.totalEstPLNoDiv >= 0 ? "+" : ""}
+                    {fmt(Math.round(Math.abs(totals.totalEstPLNoDiv)))}
+                  </td>
                 </tr>
               </tfoot>
             </table>
@@ -234,8 +257,8 @@ function ReportContent({
               className={`text-xs ${isScreen ? "text-zinc-400 mt-3" : "text-zinc-400 print:text-black mt-4 mb-2"}`}
             >
               預估收入 = 市價 − 賣出手續費({(0.1425 * data.fee_discount).toFixed(4)}
-              %) − 證交稅(股票0.3% / ETF0.1%)　｜　預估損益 = 預估收入 + 已領取股息 −
-              投資成本
+              %) − 證交稅(股票0.3% / ETF0.1%)　｜　預估損益(含息) = 預估收入 + 已領取股息 −
+              投資成本　｜　預估損益(不含息) = 預估收入 − 投資成本
             </p>
           </div>
         )}
@@ -359,13 +382,15 @@ export default function ReportPage() {
     const sellTax = marketValue * sellTaxRate;
     const estimatedRevenue = marketValue - sellFee - sellTax;
     const estimatedPL = estimatedRevenue + h.total_dividend - h.total_cost;
-    return { cp, marketValue, sellFee, sellTax, estimatedRevenue, estimatedPL };
+    const estimatedPLNoDiv = estimatedRevenue - h.total_cost;
+    return { cp, marketValue, sellFee, sellTax, estimatedRevenue, estimatedPL, estimatedPLNoDiv };
   });
 
   const totals: ReportTotals = {
     totalMarketValue: precomputed.reduce((s, p) => s + p.marketValue, 0),
     totalEstRevenue: precomputed.reduce((s, p) => s + p.estimatedRevenue, 0),
     totalEstPL: precomputed.reduce((s, p) => s + p.estimatedPL, 0),
+    totalEstPLNoDiv: precomputed.reduce((s, p) => s + p.estimatedPLNoDiv, 0),
     totalAssets:
       (data?.settlement_balance || 0) +
       precomputed.reduce((s, p) => s + p.marketValue, 0),

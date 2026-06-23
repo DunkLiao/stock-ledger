@@ -106,6 +106,7 @@ export default function DashboardPage() {
     const sellTax = marketValue * sellTaxRate;
     const estimatedRevenue = marketValue - sellFee - sellTax;
     const estimatedPL = estimatedRevenue + h.total_dividend - h.total_cost;
+    const estimatedPLNoDiv = estimatedRevenue - h.total_cost;
     const isManual = manualPrice != null;
     const changePct = h.change_percent;
 
@@ -115,6 +116,7 @@ export default function DashboardPage() {
       marketValue,
       estimatedRevenue,
       estimatedPL,
+      estimatedPLNoDiv,
       isManual,
       changePct,
     };
@@ -122,6 +124,7 @@ export default function DashboardPage() {
   const totalMarketValue = holdingRows.reduce((sum, row) => sum + row.marketValue, 0);
   const totalEstRevenue = holdingRows.reduce((sum, row) => sum + row.estimatedRevenue, 0);
   const totalEstPL = holdingRows.reduce((sum, row) => sum + row.estimatedPL, 0);
+  const totalEstPLNoDiv = holdingRows.reduce((sum, row) => sum + row.estimatedPLNoDiv, 0);
   const totalAssets = data.settlement_balance + totalMarketValue;
 
   return (
@@ -233,11 +236,12 @@ export default function DashboardPage() {
                   <th className="pb-2 pr-2 text-right">漲跌</th>
                   <th className="pb-2 pr-2 text-right">已領取股息</th>
                   <th className="pb-2 pr-2 text-right">預估收入</th>
-                  <th className="pb-2 pr-2 text-right">預估損益</th>
-                </tr>
+                   <th className="pb-2 pr-2 text-right">預估損益(含息)</th>
+                   <th className="pb-2 pr-2 text-right">預估損益(不含息)</th>
+                 </tr>
               </thead>
               <tbody>
-                {holdingRows.map(({ h, cp, estimatedRevenue, estimatedPL, isManual, changePct }) => {
+                {holdingRows.map(({ h, cp, estimatedRevenue, estimatedPL, estimatedPLNoDiv, isManual, changePct }) => {
                   return (
                     <tr key={h.stock_code} className="border-b border-zinc-100">
                       <td className="py-2 pr-2 font-mono">{h.stock_code}</td>
@@ -299,6 +303,13 @@ export default function DashboardPage() {
                       >
                         {estimatedPL >= 0 ? "+" : ""}${Math.round(Math.abs(estimatedPL)).toLocaleString()}
                       </td>
+                      <td
+                        className={`py-2 pr-2 text-right font-medium ${
+                          estimatedPLNoDiv >= 0 ? "text-red-600" : "text-green-600"
+                        }`}
+                      >
+                        {estimatedPLNoDiv >= 0 ? "+" : ""}${Math.round(Math.abs(estimatedPLNoDiv)).toLocaleString()}
+                      </td>
                     </tr>
                   );
                 })}
@@ -318,12 +329,18 @@ export default function DashboardPage() {
                   >
                     {totalEstPL >= 0 ? "+" : ""}${Math.round(Math.abs(totalEstPL)).toLocaleString()}
                   </td>
-                  <td></td>
+                  <td
+                    className={`pt-3 text-right ${
+                      totalEstPLNoDiv >= 0 ? "text-red-600" : "text-green-600"
+                    }`}
+                  >
+                    {totalEstPLNoDiv >= 0 ? "+" : ""}${Math.round(Math.abs(totalEstPLNoDiv)).toLocaleString()}
+                  </td>
                 </tr>
               </tfoot>
             </table>
             <p className="text-xs text-zinc-400 mt-3">
-              預估收入 = 市價 − 賣出手續費({(0.1425 * data.fee_discount).toFixed(4)}%) − 證交稅({data.fee_discount === 0.35 ? "股票0.3% / ETF0.1%" : "股票0.3%"})　｜　預估損益 = 預估收入 + 已領取股息 − 投資成本
+              預估收入 = 市價 − 賣出手續費({(0.1425 * data.fee_discount).toFixed(4)}%) − 證交稅({data.fee_discount === 0.35 ? "股票0.3% / ETF0.1%" : "股票0.3%"})　｜　預估損益(含息) = 預估收入 + 已領取股息 − 投資成本　｜　預估損益(不含息) = 預估收入 − 投資成本
             </p>
           </div>
         )}
